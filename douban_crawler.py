@@ -1,8 +1,10 @@
 import requests
 from bs4 import BeautifulSoup
 import sqlite3
+import os
 
-db_path = 'douban_movies.db'
+db_path = os.path.join(os.path.dirname(__file__), 'douban_movies.db')
+# db_path = 'douban_movies.db'
 
 # 获取页面内容
 def get_page(url):
