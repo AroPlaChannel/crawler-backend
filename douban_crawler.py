@@ -3,17 +3,30 @@ from bs4 import BeautifulSoup
 import sqlite3
 import os
 
+import logging
+logging.basicConfig(level=logging.INFO)
+
 db_path = os.path.join(os.path.dirname(__file__), 'douban_movies.db')
 # db_path = 'douban_movies.db'
 
 # 获取页面内容
 def get_page(url):
+    logging.info(f'正在请求 URL: {url}')
+
     # 使用代理避免被识别为爬虫
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
     }
-    response = requests.get(url, headers=headers)
-    return response.content
+    # response = requests.get(url, headers=headers)
+    # return response.content
+    try:
+        response = requests.get(url, headers=headers)
+        logging.info(f'收到响应，状态码: {response.status_code}')
+        response.raise_for_status()
+        return response.content
+    except Exception as e:
+        logging.error(f'请求失败: {e}')
+        return None
 
 # 解析页面内容
 def parse_page(content):
