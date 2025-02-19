@@ -79,13 +79,16 @@ def get_movies():
 def recognize_digit():
     # 获取前端发送的输入数据
     data = request.get_json()
+    print("Received data:", data)  # 打印接收到的数据
     inputs = data.get('inputs')
     if not inputs:
         return jsonify({'error': 'No input data provided'}), 400
 
     # 数据预处理（确保输入符合网络要求）
     inputs = (numpy.asarray(inputs, dtype=numpy.float64) / 255.0 * 0.99) + 0.01
+    print("Processed inputs:", inputs)  # 打印预处理后的输入
     label = nn.predict(inputs)
+    print("Prediction result:", label)  # 打印预测结果
     return jsonify({'label': int(label)})
 
 if __name__ == '__main__':
