@@ -1,11 +1,12 @@
-# Flask: 一个用于构建web应用的轻量级框架，用jsonify函数将python数据结构转换为json格式
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request # Flask: 一个用于构建web应用的轻量级框架，用jsonify函数将python数据结构转换为json格式
 import sqlite3
-# 解决CORS（跨域资源共享）问题
-from flask_cors import CORS
+from flask_cors import CORS # 解决CORS（跨域资源共享）问题
 import os
+import numpy
+
 from baidu_crawler import get_baidu_news, save_to_db
 from douban_crawler import scrape_douban_top100, save_to_db as save_movies_to_db
+from written_number_detective import nn
 
 app = Flask(__name__)
 CORS(app)
@@ -61,15 +62,31 @@ def get_movies_from_db():
 
     return movies
 
+# 百度新闻top10
 @app.route('/api/news', methods=['GET'])
 def get_news():
     news = get_news_from_db()
     return jsonify(news)
 
+# 豆瓣电影top100
 @app.route('/api/movies', methods=['GET'])
 def get_movies():
     movies = get_movies_from_db()
     return jsonify(movies)
+
+# 手写数字神经网络识别
+@app.route('/api/recognize_digit', methods=['POST'])
+def recognize_digit():
+    # 获取前端发送的输入数据
+    data = request.get_json()
+    inputs = data.get('inputs')
+    if not inputs:
+        return jsonify({'error': 'No input data provided'}), 400
+
+    # 数据预处理（确保输入符合网络要求）
+    inputs = (numpy.asarray(inputs, dtype=numpy.float64) / 255.0 * 0.99) + 0.01
+    label = nn.predict(inputs)
+    return jsonify({'label': int(label)})
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))  # 从环境变量获取端口
