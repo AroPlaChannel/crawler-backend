@@ -79,7 +79,11 @@ def get_movies():
 def recognize_digit():
     # 获取前端发送的输入数据
     data = request.get_json()
+    if data is None:
+        print("No JSON data received")
+        return jsonify({'error': 'Invalid JSON data'}), 400
     print("Received data:", data)  # 打印接收到的数据
+    
     inputs = data.get('inputs')
     if not inputs:
         return jsonify({'error': 'No input data provided'}), 400
