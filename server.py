@@ -77,23 +77,36 @@ def get_movies():
 # 手写数字神经网络识别
 @app.route('/api/recognize_digit', methods=['POST'])
 def recognize_digit():
-    # 获取前端发送的输入数据
-    data = request.get_json()
-    if data is None:
-        print("No JSON data received")
-        return jsonify({'error': 'Invalid JSON data'}), 400
-    print("Received data:", data)  # 打印接收到的数据
-    
-    inputs = data.get('inputs')
-    if not inputs:
-        return jsonify({'error': 'No input data provided'}), 400
+    try:
+        # 打印请求方法和头信息
+        print("Request method:", request.method)
+        print("Request headers:", request.headers)
 
-    # 数据预处理（确保输入符合网络要求）
-    inputs = (numpy.asarray(inputs, dtype=numpy.float64) / 255.0 * 0.99) + 0.01
-    print("Processed inputs:", inputs)  # 打印预处理后的输入
-    label = nn.predict(inputs)
-    print("Prediction result:", label)  # 打印预测结果
-    return jsonify({'label': int(label)})
+        # 获取前端发送的输入数据
+        data = request.get_json()
+        if data is None:
+            print("No JSON data received or content type is incorrect")
+            return jsonify({'error': 'Invalid JSON data'}), 400
+        print("Received data:", data)
+
+        inputs = data.get('inputs')
+        if inputs is None:
+            print("No 'inputs' key in received data")
+            return jsonify({'error': 'No input data provided'}), 400
+        print("Inputs:", inputs)
+
+        # 数据预处理
+        inputs = (numpy.asarray(inputs, dtype=numpy.float64) / 255.0 * 0.99) + 0.01
+        print("Processed inputs:", inputs)
+
+        # 模型预测
+        label = nn.predict(inputs)
+        print("Prediction result:", label)
+
+        return jsonify({'label': int(label)})
+    except Exception as e:
+        print("An error occurred:", e)
+        return jsonify({'error': 'An error occurred during processing'}), 500
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))  # 从环境变量获取端口
